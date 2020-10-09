@@ -68,7 +68,6 @@ class CommSerial: public Comm {
 
   T_INT ghost_offsets[6];
 
-  T_INT num_packed;
   Kokkos::View<int, Kokkos::MemoryTraits<Kokkos::Atomic> > pack_count;
 
   Kokkos::View<T_INT**,Kokkos::LayoutRight> pack_indicies_all;
@@ -113,7 +112,7 @@ public:
                    const T_INT& i) const {
     if(phase == 0) {
       if( s.x(i,0)>=s.sub_domain_hi_x - comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);
@@ -124,7 +123,7 @@ public:
     }
     if(phase == 1) {
       if( s.x(i,0)<=s.sub_domain_lo_x + comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);
@@ -135,7 +134,7 @@ public:
     }
     if(phase == 2) {
       if( s.x(i,1)>=s.sub_domain_hi_y - comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned  int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);
@@ -146,7 +145,7 @@ public:
     }
     if(phase == 3) {
       if( s.x(i,1)<=s.sub_domain_lo_y + comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);
@@ -157,7 +156,7 @@ public:
     }
     if(phase == 4) {
       if( s.x(i,2)>=s.sub_domain_hi_z - comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);
@@ -168,7 +167,7 @@ public:
     }
     if(phase == 5) {
       if( s.x(i,2)<=s.sub_domain_lo_z + comm_depth ) {
-        const int pack_idx = pack_count()++;
+        const unsigned int pack_idx = pack_count()++;
         if((pack_idx < pack_indicies.extent(0)) && (N_local+N_ghost+pack_idx< s.x.extent(0))) {
           pack_indicies(pack_idx) = i;
           Particle p = s.get_particle(i);

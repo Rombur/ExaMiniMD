@@ -185,7 +185,6 @@ public:
       const T_F_FLOAT x_i = x(i,0);
       const T_F_FLOAT y_i = x(i,1);
       const T_F_FLOAT z_i = x(i,2);
-      const int type_i = type(i);
 
       int neigh_count = 0;
       for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
@@ -200,7 +199,6 @@ public:
           const T_F_FLOAT dx = x_i - x(j,0);
           const T_F_FLOAT dy = y_i - x(j,1);
           const T_F_FLOAT dz = z_i - x(j,2);
-          const int type_j = type(j);
           const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
           if((rsq <= neigh_cut*neigh_cut) && (i!=j)) {
@@ -228,7 +226,6 @@ public:
       const T_F_FLOAT x_i = x(i,0);
       const T_F_FLOAT y_i = x(i,1);
       const T_F_FLOAT z_i = x(i,2);
-      const int type_i = type(i);
 
       for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
       for(int by_j = by-1; by_j<by+2; by_j++)
@@ -242,7 +239,6 @@ public:
           const T_F_FLOAT dy = y_i - x(j,1);
           const T_F_FLOAT dz = z_i - x(j,2);
 
-          const int type_j = type(j);
           const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
           if((rsq <= neigh_cut*neigh_cut) && (i!=j)) {
@@ -267,7 +263,6 @@ public:
        const T_F_FLOAT x_i = x(i,0);
        const T_F_FLOAT y_i = x(i,1);
        const T_F_FLOAT z_i = x(i,2);
-       const int type_i = type(i);
 
        int neigh_count = 0;
        for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
@@ -293,7 +288,6 @@ public:
              const T_F_FLOAT dy = y_i - y_j;
              const T_F_FLOAT dz = z_i - z_j;
 
-             const int type_j = type(j);
              const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
              if((rsq <= neigh_cut*neigh_cut)) {
@@ -321,7 +315,6 @@ public:
        const T_F_FLOAT x_i = x(i,0);
        const T_F_FLOAT y_i = x(i,1);
        const T_F_FLOAT z_i = x(i,2);
-       const int type_i = type(i);
 
        for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
        for(int by_j = by-1; by_j<by+2; by_j++)
@@ -345,7 +338,6 @@ public:
              const T_F_FLOAT dy = y_i - y_j;
              const T_F_FLOAT dz = z_i - z_j;
 
-             const int type_j = type(j);
              const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
              if((rsq <= neigh_cut*neigh_cut)) {
@@ -379,7 +371,7 @@ public:
 
 
     // Reset the neighbor count array
-    if( num_neighs.extent(0) < N_local + 1 ) {
+    if( static_cast<int>(num_neighs.extent(0)) < N_local + 1 ) {
       num_neighs = Kokkos::View<T_INT*, MemorySpace>("NeighborsCSR::num_neighs", N_local + 1);
       neigh_offsets = Kokkos::View<T_INT*, MemorySpace>("NeighborsCSR::neigh_offsets", N_local + 1);
     } else
@@ -414,7 +406,7 @@ public:
     Kokkos::deep_copy(total_num_neighs,d_total_num_neighs);
 
     // Resize NeighborList
-    if( neighs.extent(0) < total_num_neighs )
+    if( static_cast<int>(neighs.extent(0)) < total_num_neighs )
       neighs = Kokkos::View<T_INT*, MemorySpace> ("NeighborCSR::neighs", total_num_neighs);
 
     // Copy entries from the PairList to the actual NeighborList
@@ -443,6 +435,6 @@ struct NeighborAdaptor<NEIGH_CSR> {
   typedef NeighborCSR<t_neigh_mem_space> type;
 };
 
-extern template struct NeighborCSR<t_neigh_mem_space>;
+extern template class NeighborCSR<t_neigh_mem_space>;
 #endif // #define NEIGHBOR_CSR_H
 #endif // MODULES_OPTION_CHECK / MODULES_INSTANTIATION

@@ -84,7 +84,7 @@ void ForceLJIDialNeigh<NeighborClass>::init_coeff(int nargs, char** args) {
   rnd_cutsq = cutsq;
   rnd_intensity = intensity;
   step = 0;
-};
+}
 
 template<class NeighborClass>
 void ForceLJIDialNeigh<NeighborClass>::compute(System* system, Binning* binning, Neighbor* neighbor_ ) {

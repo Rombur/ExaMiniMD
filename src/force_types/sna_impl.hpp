@@ -25,7 +25,7 @@ static const double MY_PI  = 3.14159265358979323846; // pi
 inline
 SNA::SNA(double rfac0_in,
          int twojmax_in, int diagonalstyle_in, int use_shared_arrays_in,
-         double rmin0_in, int switch_flag_in, int bzero_flag_in) 
+         double rmin0_in, int switch_flag_in, int /*bzero_flag_in*/) 
 {
   wself = 1.0;
   
@@ -289,14 +289,14 @@ void SNA::compute_zi(const Kokkos::TeamPolicy<>::member_type& team)
 
 KOKKOS_INLINE_FUNCTION
 void SNA::compute_duidrj(const Kokkos::TeamPolicy<>::member_type& team,
-                         double* rij, double wj, double rcut)
+                         double* rij_, double wj_, double rcut)
 {
   double rsq, r, x, y, z, z0, theta0, cs, sn;
   double dz0dr;
 
-  x = rij[0];
-  y = rij[1];
-  z = rij[2];
+  x = rij_[0];
+  y = rij_[1];
+  z = rij_[2];
   rsq = x * x + y * y + z * z;
   r = sqrt(rsq);
   double rscale0 = rfac0 * MY_PI / (rcut - rmin0);
@@ -310,7 +310,7 @@ void SNA::compute_duidrj(const Kokkos::TeamPolicy<>::member_type& team,
   clock_gettime(CLOCK_REALTIME, &starttime);
 #endif
 
-  compute_duarray(team, x, y, z, z0, r, dz0dr, wj, rcut);
+  compute_duarray(team, x, y, z, z0, r, dz0dr, wj_, rcut);
 
 #ifdef TIMING_INFO
   clock_gettime(CLOCK_REALTIME, &endtime);
@@ -610,9 +610,9 @@ void SNA::addself_uarraytot(const Kokkos::TeamPolicy<>::member_type& team, doubl
 ------------------------------------------------------------------------- */
 
 KOKKOS_INLINE_FUNCTION
-void SNA::add_uarraytot(const Kokkos::TeamPolicy<>::member_type& team, double r, double wj, double rcut)
+void SNA::add_uarraytot(const Kokkos::TeamPolicy<>::member_type& team, double r, double wj_, double rcut)
 {
-  const double sfac = compute_sfac(r, rcut) * wj;
+  const double sfac = compute_sfac(r, rcut) * wj_;
 
 /*
   for (int j = 0; j <= twojmax; j++)
@@ -729,7 +729,7 @@ KOKKOS_INLINE_FUNCTION
 void SNA::compute_duarray(const Kokkos::TeamPolicy<>::member_type& team,
                           double x, double y, double z,
                           double z0, double r, double dz0dr,
-			  double wj, double rcut)
+			  double wj_, double rcut)
 {
   double r0inv;
   double a_r, a_i, b_r, b_i;
@@ -871,8 +871,8 @@ void SNA::compute_duarray(const Kokkos::TeamPolicy<>::member_type& team,
   double sfac = compute_sfac(r, rcut);
   double dsfac = compute_dsfac(r, rcut);
 
-  sfac *= wj;
-  dsfac *= wj;
+  sfac *= wj_;
+  dsfac *= wj_;
 
   for (int j = 0; j <= twojmax; j++)
     for (int mb = 0; mb <= j; mb++) 

@@ -185,7 +185,6 @@ public:
       const T_F_FLOAT x_i = x(i,0);
       const T_F_FLOAT y_i = x(i,1);
       const T_F_FLOAT z_i = x(i,2);
-      const int type_i = type(i);
 
       for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
       for(int by_j = by-1; by_j<by+2; by_j++)
@@ -198,7 +197,6 @@ public:
           const T_F_FLOAT dx = x_i - x(j,0);
           const T_F_FLOAT dy = y_i - x(j,1);
           const T_F_FLOAT dz = z_i - x(j,2);
-          const int type_j = type(j);
           const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
           if((rsq <= neigh_cut*neigh_cut) && (i!=j)) {
@@ -233,7 +231,6 @@ public:
        const T_F_FLOAT x_i = x(i,0);
        const T_F_FLOAT y_i = x(i,1);
        const T_F_FLOAT z_i = x(i,2);
-       const int type_i = type(i);
 
        for(int bx_j = bx-1; bx_j<bx+2; bx_j++)
        for(int by_j = by-1; by_j<by+2; by_j++)
@@ -257,7 +254,6 @@ public:
              const T_F_FLOAT dy = y_i - y_j;
              const T_F_FLOAT dz = z_i - z_j;
 
-             const int type_j = type(j);
              const T_F_FLOAT rsq = dx*dx + dy*dy + dz*dz;
 
              if((rsq <= neigh_cut*neigh_cut)) {
@@ -286,7 +282,7 @@ public:
     half_neigh = half_neigh_;
 
     // Reset the neighbor count array
-    if( neigh_list.num_neighs.extent(0) < N_local + 1 )
+    if( static_cast<int>(neigh_list.num_neighs.extent(0)) < N_local + 1 )
       neigh_list.num_neighs = Kokkos::View<T_INT*, MemorySpace>("Neighbors2D::num_neighs", N_local + 1);
 
     // Create the pair list
@@ -304,7 +300,7 @@ public:
     do {
 
       // Resize NeighborList
-      if( neigh_list.neighs.extent(0) < N_local + 1 || neigh_list.neighs.extent(1) < neigh_list.maxneighs )
+      if( static_cast<int>(neigh_list.neighs.extent(0)) < N_local + 1 || static_cast<int>(neigh_list.neighs.extent(1)) < neigh_list.maxneighs )
         neigh_list.neighs = Kokkos::View<T_INT**, MemorySpace> ("Neighbor2D::neighs", N_local + 1, neigh_list.maxneighs);
 
 
@@ -339,6 +335,6 @@ struct NeighborAdaptor<NEIGH_2D> {
   typedef Neighbor2D<t_neigh_mem_space> type;
 };
 
-extern template struct Neighbor2D<t_neigh_mem_space>;
+extern template class Neighbor2D<t_neigh_mem_space>;
 #endif // #define NEIGHBOR_2D_H
 #endif // MODULES_OPTION_CHECK / MODULES_INSTANTIATION

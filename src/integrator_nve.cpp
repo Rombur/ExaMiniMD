@@ -59,7 +59,7 @@ namespace {
       t_type type_, t_mass mass_, t_id id_,
       T_V_FLOAT dtf_, T_V_FLOAT dtv_, int step_
     ):x(x_),v(v_),f(f_),type(type_),mass(mass_),
-      id(id_),dtf(dtf_),dtv(dtv_),step(step_) {}
+      id(id_),step(step_),dtf(dtf_),dtv(dtv_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator() (const T_INT& i) const {
@@ -100,7 +100,7 @@ namespace {
       T_V_FLOAT dtf_, T_V_FLOAT dtv_,
       t_id id_, int step_, t_x x_
     ):v(v_),f(f_),type(type_),mass(mass_),
-      dtf(dtf_),dtv(dtv_),id(id_),step(step_),x(x_) {}
+      id(id_),step(step_),x(x_),dtf(dtf_),dtv(dtv_) {}
 
     KOKKOS_INLINE_FUNCTION
     void operator() (const T_INT& i) const {

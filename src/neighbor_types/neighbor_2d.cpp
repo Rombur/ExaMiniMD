@@ -39,7 +39,7 @@
 #include <neighbor_2d.h>
 
 #ifdef EMD_ENABLE_GPU
-template struct Neighbor2D<t_neigh_mem_space>;
+template class Neighbor2D<t_neigh_mem_space>;
 #endif
-template struct Neighbor2D<Kokkos::HostSpace>;
+template class Neighbor2D<Kokkos::HostSpace>;
 

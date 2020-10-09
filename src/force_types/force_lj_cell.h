@@ -143,7 +143,7 @@ public:
     T_F_FLOAT PE_i;
     const T_INT i_offset = bin_offsets(bx,by,bz);
     Kokkos::parallel_reduce(Kokkos::TeamThreadRange(team,0,bin_count(bx,by,bz)), [&]
-      (const int bi, T_F_FLOAT& PE_i) {
+      (const int bi, T_F_FLOAT& PE_i_local) {
       const T_INT i = permute_vector(i_offset + bi);
       if(i>=N_local) return;
       const T_F_FLOAT x_i = x(i,0);
@@ -159,7 +159,7 @@ public:
 
         T_F_FLOAT PE_ibj;
         Kokkos::parallel_reduce(Kokkos::ThreadVectorRange(team, bin_count(bx_j,by_j,bz_j)), [&]
-          (const T_INT bj, T_F_FLOAT& PE_ibj) {
+          (const T_INT bj, T_F_FLOAT& PE_ibj_local) {
           T_INT j = permute_vector(j_offset + bj);
           const T_F_FLOAT dx = x_i - x(j,0);
           const T_F_FLOAT dy = y_i - x(j,1);
@@ -171,15 +171,15 @@ public:
           if((rsq < cutsq(type_i,type_j)) && (i!=j)) {
             T_F_FLOAT r2inv = 1.0/rsq;
             T_F_FLOAT r6inv = r2inv*r2inv*r2inv;
-            PE_ibj += 0.5*r6inv * (0.5*lj1(type_i,type_j)*r6inv - lj2(type_i,type_j)) / 6.0; // optimize later
+            PE_ibj_local += 0.5*r6inv * (0.5*lj1(type_i,type_j)*r6inv - lj2(type_i,type_j)) / 6.0; // optimize later
             if (shift_flag) {
               T_F_FLOAT r2invc = 1.0/cutsq(type_i,type_j);
               T_F_FLOAT r6invc = r2invc*r2invc*r2invc;
-              PE_ibj -= 0.5*r6invc * (0.5*lj1(type_i,type_j)*r6invc - lj2(type_i,type_j)) / 6.0; // optimize later
+              PE_ibj_local -= 0.5*r6invc * (0.5*lj1(type_i,type_j)*r6invc - lj2(type_i,type_j)) / 6.0; // optimize later
             }
           }
         },PE_ibj);
-        PE_i += PE_ibj;
+        PE_i_local += PE_ibj;
       }
       },PE_i);
     PE_bi += PE_i;

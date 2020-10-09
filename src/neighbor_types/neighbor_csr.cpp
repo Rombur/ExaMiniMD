@@ -39,7 +39,7 @@
 #include <neighbor_csr.h>
 
 #ifdef EMD_ENABLE_GPU
-template struct NeighborCSR<t_neigh_mem_space>;
+template class NeighborCSR<t_neigh_mem_space>;
 #endif
-template struct NeighborCSR<Kokkos::HostSpace>;
+template class NeighborCSR<Kokkos::HostSpace>;
 

@@ -38,13 +38,13 @@
 
 #include<force_lj_cell.h>
 
-ForceLJCell::ForceLJCell(char** args, System* system, bool half_neigh_):Force(args,system,half_neigh) {
+ForceLJCell::ForceLJCell(char** args, System* system, bool half_neigh_):Force(args,system,half_neigh_) {
   lj1 = t_fparams("ForceLJCell::lj1",system->ntypes,system->ntypes);
   lj2 = t_fparams("ForceLJCell::lj2",system->ntypes,system->ntypes);
   cutsq = t_fparams("ForceLJCell::cutsq",system->ntypes,system->ntypes);
 }
 
-void ForceLJCell::init_coeff(int nargs, char** args) {
+void ForceLJCell::init_coeff(int /*nargs*/, char** args) {
   int one_based_type = 1;
   int t1 = atoi(args[1])-one_based_type;
   int t2 = atoi(args[2])-one_based_type;
@@ -58,7 +58,7 @@ void ForceLJCell::init_coeff(int nargs, char** args) {
   lj2(t2,t1) = lj2(t1,t2);
   cutsq(t1,t2) = cut*cut;
   cutsq(t2,t1) = cut*cut;
-};
+}
 
 void ForceLJCell::compute(System* system, Binning* binning, Neighbor*) {
   x = system->x;
