@@ -36,8 +36,57 @@
 //  Questions? Contact Christian R. Trott (crtrott@sandia.gov)
 //************************************************************************
 
-// Include Module header files for neighbor
-#include <neighbor_2d.h>
-#include <neighbor_csr.h>
-#include <neighbor_arborx_csr.h>
-#include <neighbor_csr_map_constr.h>
+#ifndef NEIGHBOR_LIST_CSR_H
+#define NEIGHBOR_LIST_CSR_H
+
+#include <Kokkos_StaticCrsGraph.hpp>
+
+#include <iostream>
+#include <set>
+
+template<class MemorySpace>
+struct NeighListCSR : public Kokkos::StaticCrsGraph<T_INT,Kokkos::LayoutLeft,MemorySpace,void,T_INT> {
+  struct NeighViewCSR {
+    private:
+      const T_INT* const ptr;
+      const T_INT num_neighs;
+
+    public:
+      KOKKOS_INLINE_FUNCTION
+      NeighViewCSR (const T_INT* const ptr_, const T_INT& num_neighs_):
+        ptr(ptr_),num_neighs(num_neighs_) {}
+
+      KOKKOS_INLINE_FUNCTION
+      T_INT operator() (const T_INT& i) const { return ptr[i]; }
+
+      KOKKOS_INLINE_FUNCTION
+      T_INT get_num_neighs() const { return num_neighs; }
+  };
+
+  typedef NeighViewCSR t_neighs;
+
+  NeighListCSR() :
+    Kokkos::StaticCrsGraph<T_INT,Kokkos::LayoutLeft,MemorySpace,void,T_INT>() {}
+  NeighListCSR (const NeighListCSR& rhs) :
+    Kokkos::StaticCrsGraph<T_INT,Kokkos::LayoutLeft,MemorySpace,void,T_INT>(rhs) {
+  }
+
+  template<class EntriesType, class RowMapType>
+  NeighListCSR (const EntriesType& entries_,const RowMapType& row_map_) :
+    Kokkos::StaticCrsGraph<T_INT,Kokkos::LayoutLeft,MemorySpace,void,T_INT>( entries_, row_map_) {}
+
+
+  KOKKOS_INLINE_FUNCTION
+  T_INT get_num_neighs(const T_INT& i) const {
+    return this->row_map(i+1) - this->row_map(i);
+  }
+
+  KOKKOS_INLINE_FUNCTION
+  t_neighs get_neighs(const T_INT& i) const {
+    const T_INT start = this->row_map(i);
+    const T_INT end = this->row_map(i+1);
+    return t_neighs(&this->entries(start),end-start);
+  }
+};
+
+#endif

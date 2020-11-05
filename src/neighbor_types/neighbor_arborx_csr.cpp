@@ -36,8 +36,9 @@
 //  Questions? Contact Christian R. Trott (crtrott@sandia.gov)
 //************************************************************************
 
-// Include Module header files for neighbor
-#include <neighbor_2d.h>
-#include <neighbor_csr.h>
 #include <neighbor_arborx_csr.h>
-#include <neighbor_csr_map_constr.h>
+
+#ifdef EMD_ENABLE_GPU
+template class NeighborArborXCSR<t_neigh_mem_space>;
+#endif
+template class NeighborArborXCSR<Kokkos::HostSpace>;

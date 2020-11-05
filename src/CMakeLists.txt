@@ -55,4 +55,4 @@ if (USE_MPI)
 endif()
 
 target_include_directories(ExaMiniMD PRIVATE ${Kokkos_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${SUBDIRECTORIES})
-target_link_libraries(ExaMiniMD PRIVATE $<$<BOOL:${USE_MPI}>:MPI::MPI_CXX> Kokkos::kokkos)
+target_link_libraries(ExaMiniMD PRIVATE $<$<BOOL:${USE_MPI}>:MPI::MPI_CXX> Kokkos::kokkos ArborX::ArborX)

@@ -18,6 +18,8 @@ else()
   endif()
 endif()
 
+find_package(ArborX REQUIRED)
+
 # force target_source to resolve relative paths immediately
 if(POLICY CMP0076)
   cmake_policy(SET CMP0076 NEW)

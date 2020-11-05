@@ -168,7 +168,7 @@ void Input::read_command_line_args(int argc, char* argv[]) {
         printf("                              (N = positive integer)\n");
         printf("                              (PATH = location of directory)\n");
         printf("  --neigh-type [TYPE]:        Specify Neighbor Routines implementation \n");
-        printf("                              (2D, CSR, CSR_MAPCONSTR)\n");
+        printf("                              (2D, CSR, ARBORX_CSR, CSR_MAPCONSTR)\n");
       }
     }
 
