@@ -45,7 +45,6 @@
 // Instantiation and Init of this class
 #ifdef NEIGHBOR_MODULES_INSTANTIATION
     else if (input->neighbor_type == NEIGH_ARBORX_CSR) {
-      std::cout<<"Using NeighborArborXCSR"<<std::endl;
       neighbor = new NeighborArborXCSR<t_neigh_mem_space>();
       neighbor->init(input->force_cutoff + input->neighbor_skin);
     }
@@ -124,33 +123,7 @@ class NeighborArborXCSR : public Neighbor
       type = system->type;
       id = system->id;
       half_neigh = half_neigh_;
-
-      //T_INT total_num_neighs;
-      
-     // // Reset the neighbor count array
-     // if( static_cast<int>(num_neighs.extent(0)) < N_local + 1 ) 
-     // {
-     //   num_neighs = Kokkos::View<T_INT*, MemorySpace>("NeighborsArborXCSR::num_neighs", N_local + 1);
-     //   neigh_offsets = Kokkos::View<T_INT*, MemorySpace>("NeighborsArborXCSR::neigh_offsets", N_local + 1);
-     // } 
-     // else
-     //   Kokkos::deep_copy(num_neighs,0);
-
-     // // Create the pair list
-     // nhalo = binning->nhalo;
-     // nbinx = binning->nbinx - 2*nhalo;
-     // nbiny = binning->nbiny - 2*nhalo;
-     // nbinz = binning->nbinz - 2*nhalo;
-
-     // T_INT nbins = nbinx*nbiny*nbinz;
-
-     // bin_offsets = binning->binoffsets;
-     // bin_count = binning->bincount;
-      permute_vector = binning->permute_vector;
-      int p_max = -1;
-      for (unsigned int i=0; i<permute_vector.extent(0); ++i)
-        if (permute_vector(i) > p_max)
-          p_max = permute_vector(i);
+      unsigned int const n_particles =  system->N_local+system->N_ghost;
 
 			Kokkos::View<int *, MemorySpace> offset("offset", 0);
 			Kokkos::View<int *, MemorySpace> indices("indices", 0);
@@ -166,10 +139,10 @@ class NeighborArborXCSR : public Neighbor
 
         // Spatial search. Radius is neigh_cut
         Kokkos::View<ArborX::Point *, MemorySpace> particles(
-          Kokkos::ViewAllocateWithoutInitializing("particles"), p_max);
+          Kokkos::ViewAllocateWithoutInitializing("particles"), n_particles);
         Kokkos::parallel_for(
           "fill_particles",
-          Kokkos::RangePolicy<ExecutionSpace>(0, p_max), KOKKOS_LAMBDA(int i) {
+          Kokkos::RangePolicy<ExecutionSpace>(0, n_particles), KOKKOS_LAMBDA(int i) {
             for (int d = 0; d<3; ++d)
             particles(i)[d] = x(i,d);
           });
@@ -198,8 +171,6 @@ class NeighborArborXCSR : public Neighbor
               indices(n) = tmp_indices(j);
               ++n;
             }
-            if (tmp_indices(j) >= particles.extent(0))
-              std::cout<< tmp_indices(j) << " " << particles.extent(0) <<std::endl;
           }
         }
         for (unsigned int i=1; i<offset.extent(0); ++i)

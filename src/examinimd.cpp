@@ -127,7 +127,8 @@ void ExaMiniMD::init(int argc, char* argv[]) {
   comm->exchange_halo();
 
   // Create binning for neighborlist construction
-  binning->create_binning(neigh_cutoff,neigh_cutoff,neigh_cutoff,1,true,true,false);
+  if (input->neighbor_type != NEIGH_ARBORX_CSR)
+    binning->create_binning(neigh_cutoff,neigh_cutoff,neigh_cutoff,1,true,true,false);
 
   // Compute NeighList
   if(neighbor)
@@ -213,7 +214,8 @@ void ExaMiniMD::run(int nsteps) {
 
       // Create binning for neighborlist construction
       neigh_timer.reset();
-      binning->create_binning(neigh_cutoff,neigh_cutoff,neigh_cutoff,1,true,true,false);
+      if (input->neighbor_type != NEIGH_ARBORX_CSR)
+        binning->create_binning(neigh_cutoff,neigh_cutoff,neigh_cutoff,1,true,true,false);
 
       // Compute Neighbor List if necessary
       if(neighbor)
