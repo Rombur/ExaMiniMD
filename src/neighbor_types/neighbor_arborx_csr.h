@@ -138,21 +138,25 @@ class NeighborArborXCSR : public Neighbor
         using ExecutionSpace = Kokkos::DefaultExecutionSpace;
 
         // Spatial search. Radius is neigh_cut
+        t_x x_dummy = x;
         Kokkos::View<ArborX::Point *, MemorySpace> particles(
           Kokkos::ViewAllocateWithoutInitializing("particles"), n_particles);
         Kokkos::parallel_for(
           "fill_particles",
           Kokkos::RangePolicy<ExecutionSpace>(0, n_particles), KOKKOS_LAMBDA(int i) {
             for (int d = 0; d<3; ++d)
-            particles(i)[d] = x(i,d);
+            particles(i)[d] = x_dummy(i,d);
           });
 
+        T_X_FLOAT neigh_cut_dummy = neigh_cut;
         Kokkos::View<decltype(ArborX::intersects(ArborX::Sphere{})) *, MemorySpace>
           queries(Kokkos::ViewAllocateWithoutInitializing("queries"), N_local);
         Kokkos::parallel_for(
           "setup_radius_search_queries",
           Kokkos::RangePolicy<ExecutionSpace>(0, N_local), KOKKOS_LAMBDA(int i) {
-            queries(i) = ArborX::intersects(ArborX::Sphere{{x(i,0), x(i,1), x(i,2)}, neigh_cut});
+            queries(i) = ArborX::intersects(ArborX::Sphere{{static_cast<float>(x_dummy(i,0)), 
+              static_cast<float>(x_dummy(i,1)), static_cast<float>(x_dummy(i,2))}, 
+              neigh_cut_dummy});
           });
 
         // Perform the Search
@@ -175,7 +179,6 @@ class NeighborArborXCSR : public Neighbor
         }
         for (unsigned int i=1; i<offset.extent(0); ++i)
           offset(i) -= i;
-        
       }
 
       // Create actual CSR NeighList
