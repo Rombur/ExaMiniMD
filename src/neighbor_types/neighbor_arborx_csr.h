@@ -114,8 +114,18 @@ class NeighborArborXCSR : public Neighbor
       neigh_cut = neigh_cut_;
     }
 
-    void create_neigh_list(System* system, Binning* binning, bool half_neigh_, 
-                           bool /*ghost_neighs_*/) override
+    template <typename ExecutionSpace>
+    void create_neigh_list_impl(System* system, Binning* binning, bool half_neigh_,
+                           typename std::enable_if_t<
+                              !std::is_same_v<typename ExecutionSpace::memory_space, MemorySpace>, int> = 0)
+    {
+      throw std::runtime_error("Internal Error");
+    }
+
+    template <typename ExecutionSpace>
+    void create_neigh_list_impl(System* system, Binning* binning, bool half_neigh_,
+                           typename std::enable_if_t<
+                              std::is_same_v<typename ExecutionSpace::memory_space, MemorySpace>, int> = 0)
     {
       // Get some data handles
       N_local = system->N_local;
@@ -135,8 +145,6 @@ class NeighborArborXCSR : public Neighbor
       }
       else
       {
-        using ExecutionSpace = Kokkos::DefaultExecutionSpace;
-
         // Spatial search. Radius is neigh_cut
         t_x x_dummy = x;
         Kokkos::View<ArborX::Point *, MemorySpace> particles(
@@ -165,10 +173,11 @@ class NeighborArborXCSR : public Neighbor
 				bvh.query(ExecutionSpace{}, queries, tmp_indices, offset);
 
         Kokkos::realloc(indices, tmp_indices.extent(0)-N_local);
-        int n = 0;
-        for (unsigned int i=0; i<static_cast<int>(offset.extent(0))-1; ++i)
-        { 
-          for (unsigned int j=offset(i); j<offset(i+1); ++j)
+        Kokkos::parallel_for(
+          "modify_indices",
+          Kokkos::RangePolicy<ExecutionSpace>(0, N_local), KOKKOS_LAMBDA(int i) {
+          int n = offset(i) - i;
+          for (int j=offset(i); j<offset(i+1); ++j)
           {
             if (tmp_indices(j) != i)
             {
@@ -176,13 +185,26 @@ class NeighborArborXCSR : public Neighbor
               ++n;
             }
           }
-        }
-        for (unsigned int i=1; i<offset.extent(0); ++i)
+          });
+
+        Kokkos::parallel_for(
+          "modify_offset",
+          Kokkos::RangePolicy<ExecutionSpace>(1, N_local+1), KOKKOS_LAMBDA(int i) {
           offset(i) -= i;
+          });
       }
 
       // Create actual CSR NeighList
       neigh_list = t_neigh_list(indices, offset);
+    }
+    
+    void create_neigh_list(System* system, Binning* binning, bool half_neigh_, 
+                           bool /*ghost_neighs_*/) override
+    {
+      if (std::is_same_v<t_neigh_mem_space, MemorySpace>)
+        create_neigh_list_impl<Kokkos::DefaultExecutionSpace>(system, binning, half_neigh_);
+      else
+        create_neigh_list_impl<Kokkos::Serial>(system, binning, half_neigh_);
     }
 
     t_neigh_list get_neigh_list()
